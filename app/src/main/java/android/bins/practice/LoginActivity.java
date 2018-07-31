@@ -22,6 +22,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity  implements GoogleApiClient.OnConnectionFailedListener{
 
@@ -29,7 +30,7 @@ public class LoginActivity extends AppCompatActivity  implements GoogleApiClient
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
     private GoogleSignInClient mGoogleSignInClient;
-
+    private FirebaseFirestore db;
 
 
 
@@ -38,6 +39,7 @@ public class LoginActivity extends AppCompatActivity  implements GoogleApiClient
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
 
         // Configure Google Sign In
