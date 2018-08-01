@@ -2,6 +2,8 @@ package android.bins.practice;
 
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,12 +27,33 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import android.support.design.widget.NavigationView;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
-    private static final int RC_SIGN_IN = 10;
+
+
     private FirebaseAuth mAuth;
-    private GoogleApiClient mGoogleApiClient;
-    private GoogleSignInClient mGoogleSignInClient;
+
+    private static final String TAG = "MainAct";
+
+    private FirebaseUser user;
+
+
+    private DrawerLayout layoutDrawer;
+
+    private ConstraintLayout navRightMain;
+
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    private CollectionReference userColRef = db.collection("user");
+
+    private NavigationView navRightView;
+
+
+    private String myNickname;
+    private String myEmail;
+
 
 
 
@@ -42,18 +65,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         mAuth = FirebaseAuth.getInstance();
 
 
-        // Configure Google Sign In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this)
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
 
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+
+        layoutDrawer = (DrawerLayout) findViewById(R.id.activityMain);
+        navRightView = (NavigationView) findViewById(R.id.rightNavView);
 
 
 
-        SignInButton button = (SignInButton) findViewById(R.id.loginButton);
+        Button button = (Button) findViewById(R.id.loginButton);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
