@@ -1,36 +1,23 @@
 package android.bins.practice;
 
-import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
+import android.widget.*;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.android.gms.tasks.OnSuccessListener;
+import android.util.Log;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 import android.support.design.widget.NavigationView;
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity {
 
 
     private FirebaseAuth mAuth;
@@ -74,67 +61,115 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
 
 
-        Button button = (Button) findViewById(R.id.loginButton);
+        Button button = (Button) findViewById(R.id.btnSetting);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-//                startActivityForResult(signInIntent, RC_SIGN_IN);
-//
-                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                                startActivityForResult(signInIntent, RC_SIGN_IN);
+
+                    layoutDrawer.openDrawer(navRightView);
             }
 
 
         });
 
-    }
+        navRightMain=(ConstraintLayout) navRightView.getHeaderView(0);
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        if (user.getDisplayName() != null) {
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
-            } catch (ApiException e) {
-                // Google Sign In failed, update UI appropriately
-               // Log.w(TAG, "Google sign in failed", e);
-                // ...
-            }
+            TextView navRightMainNickname = (TextView) navRightMain.findViewById(R.id.txtNickname0);
+            navRightMainNickname.setText(user.getDisplayName());
         }
-    }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-       /// Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        if (user.getEmail() != null) {
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            TextView navRightMainEmail = (TextView) navRightMain.findViewById(R.id.txtEmail0);
+            navRightMainEmail.setText(user.getEmail());
+        }
+
+
+        if (myNickname != null) {
+
+            TextView navRightMainNickname1 = (TextView) navRightMain.findViewById(R.id.txtNickname1);
+            navRightMainNickname1.setText(myNickname);
+        }
+
+        if (myEmail != null) {
+
+            TextView navRightMainEmail1 = (TextView) navRightMain.findViewById(R.id.txtEmail1);
+            navRightMainEmail1.setText(myEmail);
+        }
+
+
+
+
+        user = mAuth.getCurrentUser();
+
+
+        Log.d("getUID",user.getUid());
+
+        userColRef.document(user.getUid())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                             } else {
-                            // If sign in fails, display a message to the user.
-//                            Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication 성공",
-                                    Toast.LENGTH_SHORT).show();
-                        //    updateUI(null);
-                        }
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
 
-                        // ...
+
+
+
+                            Log.d(TAG, "DocumentSnapshot data: " + documentSnapshot.getData());
+
+
+                            myNickname = new String(documentSnapshot.getData().get("nickname").toString());
+                            myEmail = new String(documentSnapshot.getData().get("email").toString());
+
+
+                            if (myNickname != null) {
+
+                                TextView navRightMainNickname1 = (TextView) navRightMain.findViewById(R.id.txtNickname1);
+                                navRightMainNickname1.setText(myNickname);
+                            }
+
+                            if (myEmail != null) {
+
+                                TextView navRightMainEmail1 = (TextView) navRightMain.findViewById(R.id.txtEmail1);
+                                navRightMainEmail1.setText(myEmail);
+                            }
+
+
+                        } else {
+
+
+                        }
                     }
                 });
+
+
+
     }
+
+
+
+
+
+
+
+
+
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onBackPressed() {
+
+
+        if (layoutDrawer.isDrawerOpen(navRightView)) {
+            layoutDrawer.closeDrawer(navRightView);
+            return;
+        }
+
+
+
 
     }
+
 }
